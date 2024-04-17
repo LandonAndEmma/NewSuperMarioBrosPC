@@ -121,11 +121,6 @@ ground_height = ground_image.get_height()
 bg_images = [pygame.image.load(f"Sprites/plx-{i}.png").convert_alpha() for i in range(1, 4)]
 bg_width = bg_images[0].get_width()
 
-lava_image = pygame.image.load("Sprites/Lava.png").convert_alpha()
-lava_width = lava_image.get_width()
-lava_height = lava_image.get_height()
-lava_rect = lava_image.get_rect(bottom=SCREEN_HEIGHT - ground_height + 2)
-
 def draw_bg():
     for x in range(6):
         for i in bg_images:
@@ -136,51 +131,71 @@ def draw_ground():
     flag_image = pygame.image.load("Sprites/FlagPole.png").convert_alpha()
     flag_width = flag_image.get_width()
     flag_height = flag_image.get_height()
-    
+    lava_image = pygame.image.load("Sprites/Lava.png").convert_alpha()
+    lava_width = lava_image.get_width()
+    lava_height = lava_image.get_height()
+    lava_rect = lava_image.get_rect()
+
     for x in range(5):
         screen.blit(ground_image, ((x * ground_width) - scroll * 2.5, SCREEN_HEIGHT - ground_height))
-    
+
     for x in range(5, 6):
         screen.blit(lava_image, ((x * lava_width) - scroll * 2.5, SCREEN_HEIGHT - lava_height + 2))
-    
+
     for x in range(6, 40):
         screen.blit(ground_image, ((x * ground_width) - scroll * 2.5, SCREEN_HEIGHT - ground_height))
-    
+
     for x in range(25, 26):
         screen.blit(flag_image, ((x * flag_width) - scroll * 2.5, SCREEN_HEIGHT - flag_height - ground_height))
 
-game_over_image = pygame.image.load("Sprites/GameOver.png").convert_alpha()
-game_over_rect = game_over_image.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+def game_over():
+    game_over_image = pygame.image.load("Sprites/GameOver.png").convert_alpha()
+    screen.blit(game_over_image, (SCREEN_WIDTH / 2 - game_over_image.get_width() / 2, SCREEN_HEIGHT / 2 - game_over_image.get_height() / 2))
+    pygame.display.update()
+    pygame.time.delay(2000)
+    reset_game()
+
+def reset_game():
+    block.rect.center = (400, 400)
+    all_sprites.add(block)
 
 run = True
-game_over = False
+reached_end = False
+endingimage = pygame.image.load("Sprites/Finish.png").convert_alpha()
+endingimagewidth = endingimage.get_width()
+endingimageheight = endingimage.get_height()
 
 while run:
     clock.tick(FPS)
     draw_bg()
     draw_ground()
-    
-    if not game_over:
-        key = pygame.key.get_pressed()
-        if key[pygame.K_LEFT] and scroll > 0:
-            scroll -= 5
-        if key[pygame.K_RIGHT] and scroll < 3000:
-            scroll += 5
-        if block.rect.colliderect(lava_rect):
-            pygame.mixer.Channel(1).play(pygame.mixer.Sound("Music/Lose a Life.wav"))
-            game_over = True
-    
-    if game_over:
-        screen.blit(game_over_image, game_over_rect)
-        if key[pygame.K_SPACE]:
-            block.rect.center = (400, 400)
-            game_over = False
-    
+
+    key = pygame.key.get_pressed()
+    if key[pygame.K_LEFT] and scroll > 0:
+        scroll -= 5
+    if key[pygame.K_RIGHT] and scroll < 3000:
+        scroll += 5
+    if scroll >= 3000 and not reached_end:
+        reached_end = True
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
-    
+
+    if block.rect.colliderect(lava_rect):
+        pygame.mixer.Channel(1).play(pygame.mixer.Sound("Music/Lose a Life.wav"))
+        game_over()
+
+    if reached_end:
+        pygame.mixer.Channel(0).play(pygame.mixer.Sound("Music/Course Clear.wav"))
+        reached_end = None
+
+    if reached_end is None:
+        screen.blit(endingimage, (SCREEN_WIDTH / 2 - endingimagewidth / 2, SCREEN_HEIGHT / 2 - endingimageheight))
+        scroll = 3000
+
     all_sprites.update()
     all_sprites.draw(screen)
     pygame.display.update()
+
 pygame.quit()
