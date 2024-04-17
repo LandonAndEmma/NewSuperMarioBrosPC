@@ -118,6 +118,9 @@ ground_image = pygame.image.load("Sprites/ground.png").convert_alpha()
 ground_width = ground_image.get_width()
 ground_height = ground_image.get_height()
 
+lava_image = pygame.image.load("Sprites/Lava.png").convert_alpha()
+lava_rect = lava_image.get_rect()
+
 bg_images = [pygame.image.load(f"Sprites/plx-{i}.png").convert_alpha() for i in range(1, 4)]
 bg_width = bg_images[0].get_width()
 
@@ -131,16 +134,12 @@ def draw_ground():
     flag_image = pygame.image.load("Sprites/FlagPole.png").convert_alpha()
     flag_width = flag_image.get_width()
     flag_height = flag_image.get_height()
-    lava_image = pygame.image.load("Sprites/Lava.png").convert_alpha()
-    lava_width = lava_image.get_width()
-    lava_height = lava_image.get_height()
-    lava_rect = lava_image.get_rect()
 
     for x in range(5):
         screen.blit(ground_image, ((x * ground_width) - scroll * 2.5, SCREEN_HEIGHT - ground_height))
 
     for x in range(5, 6):
-        screen.blit(lava_image, ((x * lava_width) - scroll * 2.5, SCREEN_HEIGHT - lava_height + 2))
+        screen.blit(lava_image, ((x * lava_rect.width) - scroll * 2.5, SCREEN_HEIGHT - lava_rect.height + 2))
 
     for x in range(6, 40):
         screen.blit(ground_image, ((x * ground_width) - scroll * 2.5, SCREEN_HEIGHT - ground_height))
